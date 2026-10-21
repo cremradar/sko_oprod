@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Опросник: Профессиональная уверенность и страх ошибки</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for Analytics Radar Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#080b14',
+                            card: 'rgba(15, 23, 42, 0.75)',
+                            neonCyan: '#00f3ff',
+                            neonPurple: '#a855f7',
+                            neonPink: '#ff007f',
+                            neonGreen: '#10b981',
+                            border: 'rgba(0, 243, 255, 0.2)',
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050811;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 243, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 127, 0.03) 0%, transparent 60%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-panel {
+            background: rgba(13, 19, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-panel-glow {
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15), inset 0 0 15px rgba(0, 243, 255, 0.05);
+        }
+
+        .neon-border {
+            border-color: rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Custom Radio Button Interactions */
+        .score-btn {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .score-btn:hover::before {
+            left: 100%;
+        }
+
+        .score-btn.selected-0 {
+            background: rgba(148, 163, 184, 0.2);
+            border-color: #94a3b8;
+            box-shadow: 0 0 12px rgba(148, 163, 184, 0.4);
+            color: #ffffff;
+        }
+        .score-btn.selected-1 {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+            color: #ffffff;
+        }
+        .score-btn.selected-2 {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+            color: #ffffff;
+        }
+        .score-btn.selected-3 {
+            background: rgba(0, 243, 255, 0.25);
+            border-color: #00f3ff;
+            box-shadow: 0 0 18px rgba(0, 243, 255, 0.6);
+            color: #ffffff;
+        }
+
+        /* Grid Background pattern */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080b14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .glass-panel {
+                background: white !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-grid relative pb-12 overflow-x-hidden">
+
+    <!-- Accent Top Line -->
+    <div class="h-1 w-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 no-print"></div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        <!-- HEADER -->
+        <header class="text-center mb-8 glass-panel p-6 sm:p-8 rounded-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <h1 class="text-2xl sm:text-4xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-200 to-purple-400 mb-3 tracking-wide uppercase">
+                Опросник: Профессиональная уверенность и страх ошибки
+            </h1>
+            <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto font-light">
+                Оценка самоощущения в учебной и практической деятельности
+            </p>
+        </header>
+
+        <!-- USER DETAILS FORM PANEL -->
+        <div id="user-info-card" class="glass-panel p-6 rounded-2xl mb-8 border-l-4 border-l-cyan-400 transition-all">
+            <div class="flex items-center space-x-3 mb-4">
+                <i class="fa-solid fa-user text-cyan-400 text-xl"></i>
+                <h2 class="text-lg font-orbitron font-semibold text-white tracking-wide">Данные участника</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 uppercase mb-2">Код участника *</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-hashtag"></i></span>
+                        <input type="text" id="user-code" placeholder="Введите код" class="w-full bg-slate-900/80 border border-slate-700/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 transition outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 uppercase mb-2">Курс *</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-graduation-cap"></i></span>
+                        <input type="text" id="user-course" placeholder="Укажите курс" class="w-full bg-slate-900/80 border border-slate-700/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 transition outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 uppercase mb-2">Дата тестирования *</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 pointer-events-none"><i class="fa-solid fa-calendar-days text-cyan-400"></i></span>
+                        <input type="date" id="user-date" class="w-full bg-slate-900/80 border border-slate-700/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 transition outline-none font-mono cursor-pointer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INSTRUCTIONS & SCALE LEGEND -->
+        <div class="glass-panel p-6 rounded-2xl mb-8 no-print">
+            <div class="flex items-start space-x-3 mb-4">
+                <i class="fa-solid fa-circle-info text-purple-400 text-xl mt-0.5"></i>
+                <div>
+                    <h3 class="font-semibold text-white text-base mb-1">Инструкция</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Прочитайте утверждения и оцените, насколько каждое из них относится к вам в учебной и практической деятельности. Верных и неверных ответов нет, отвечайте так, как бывает на самом деле.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Scale Legend Pills -->
+            <div class="pt-3 border-t border-slate-800/80">
+                <span class="text-xs font-mono text-slate-400 block mb-2 uppercase">Шкала оценок:</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div class="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 p-2 rounded-xl">
+                        <span class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-mono text-xs flex items-center justify-center font-bold">0</span>
+                        <span class="text-xs text-slate-300">Никогда</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 p-2 rounded-xl">
+                        <span class="w-6 h-6 rounded-lg bg-blue-900/60 text-blue-300 font-mono text-xs flex items-center justify-center font-bold">1</span>
+                        <span class="text-xs text-slate-300">Редко</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 p-2 rounded-xl">
+                        <span class="w-6 h-6 rounded-lg bg-purple-900/60 text-purple-300 font-mono text-xs flex items-center justify-center font-bold">2</span>
+                        <span class="text-xs text-slate-300">Часто</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 p-2 rounded-xl">
+                        <span class="w-6 h-6 rounded-lg bg-cyan-900/60 text-cyan-300 font-mono text-xs flex items-center justify-center font-bold">3</span>
+                        <span class="text-xs text-slate-300">Почти всегда</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STICKY PROGRESS BAR -->
+        <div class="sticky top-4 z-40 mb-8 no-print">
+            <div class="glass-panel p-4 rounded-2xl shadow-2xl border-cyan-500/30">
+                <div class="flex justify-between items-center mb-2 text-xs font-mono">
+                    <span class="text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-spinner animate-spin text-cyan-400" id="progress-spinner"></i>
+                        ПРОГРЕСС ЗАПОЛНЕНИЯ
+                    </span>
+                    <span id="progress-text" class="text-cyan-400 font-bold">0 / 16 (0%)</span>
+                </div>
+                <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN QUESTIONNAIRE FORM -->
+        <form id="quiz-form" onsubmit="event.preventDefault();" class="space-y-8">
+            <div id="questions-wrapper" class="space-y-8">
+                <!-- Dynamic questions rendered here -->
+            </div>
+
+            <!-- Submit Button & Error Alert -->
+            <div class="glass-panel p-6 rounded-2xl text-center no-print">
+                <div id="validation-error" class="hidden mb-4 p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-red-300 text-sm flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="error-message">Пожалуйста, заполните данные и ответьте на все вопросы!</span>
+                </div>
+
+                <button type="button" onclick="calculateResults()" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-orbitron font-bold tracking-wider rounded-xl shadow-lg hover:shadow-cyan-500/25 transition duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-3 mx-auto">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>РАССЧИТАТЬ РЕЗУЛЬТАТЫ</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- RESULTS DASHBOARD -->
+        <section id="results-dashboard" class="hidden mt-12 space-y-8">
+            <div class="glass-panel glass-panel-glow p-6 sm:p-8 rounded-3xl border-2 border-cyan-400/40 relative">
+                
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-orbitron font-bold text-white">Результаты тестирования</h2>
+                    </div>
+                    <div class="flex items-center space-x-3 no-print">
+                        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-mono flex items-center space-x-2 transition">
+                            <i class="fa-solid fa-print"></i>
+                            <span>ПЕЧАТЬ</span>
+                        </button>
+                        <button onclick="exportJSON()" class="px-4 py-2 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-800 rounded-xl text-xs font-mono flex items-center space-x-2 transition">
+                            <i class="fa-solid fa-download"></i>
+                            <span>ЭКСПОРТ JSON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- User Info in Results -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-xs font-mono">
+                    <div><span class="text-slate-500">Код участника:</span> <span id="res-user-code" class="text-cyan-300 font-bold"></span></div>
+                    <div><span class="text-slate-500">Курс:</span> <span id="res-user-course" class="text-white"></span></div>
+                    <div><span class="text-slate-500">Дата:</span> <span id="res-user-date" class="text-slate-300"></span></div>
+                </div>
+
+                <!-- Scores Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Cat 1 -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-cyan-500/30">
+                        <div class="text-xs font-mono text-slate-400 mb-1">Проявления уверенности</div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="score-cat-1" class="text-3xl font-orbitron font-bold text-cyan-400">0</span>
+                            <span class="text-xs text-slate-500">макс: 12</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div id="bar-cat-1" class="h-full bg-cyan-400 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- Cat 2 -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-pink-500/30">
+                        <div class="text-xs font-mono text-slate-400 mb-1">Проявления страха ошибки</div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="score-cat-2" class="text-3xl font-orbitron font-bold text-pink-400">0</span>
+                            <span class="text-xs text-slate-500">макс: 12</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div id="bar-cat-2" class="h-full bg-pink-400 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- Cat 3 -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-purple-500/30">
+                        <div class="text-xs font-mono text-slate-400 mb-1">Реакция на ошибку (конструктив)</div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="score-cat-3" class="text-3xl font-orbitron font-bold text-purple-400">0</span>
+                            <span class="text-xs text-slate-500">макс: 12</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div id="bar-cat-3" class="h-full bg-purple-400 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- Cat 4 -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-emerald-500/30">
+                        <div class="text-xs font-mono text-slate-400 mb-1">Учебные индикаторы</div>
+                        <div class="flex items-baseline justify-between">
+                            <span id="score-cat-4" class="text-3xl font-orbitron font-bold text-emerald-400">0</span>
+                            <span class="text-xs text-slate-500">макс: 12</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div id="bar-cat-4" class="h-full bg-emerald-400 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart & Interpretation -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                        <h4 class="text-xs font-mono text-slate-400 uppercase mb-4 text-center">Диаграмма профиля</h4>
+                        <div class="relative max-w-xs mx-auto aspect-square">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-4">
+                        <h4 class="text-sm font-orbitron text-cyan-300 tracking-wide uppercase border-b border-slate-800 pb-2">Интерпретация результатов</h4>
+                        
+                        <div id="interpretation-confidence" class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-xs sm:text-sm"></div>
+                        <div id="interpretation-fear" class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-xs sm:text-sm"></div>
+                        <div id="interpretation-reaction" class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-xs sm:text-sm"></div>
+                        <div id="interpretation-learning" class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-xs sm:text-sm"></div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-800 text-center">
+                    <p class="text-sm italic text-slate-300 mb-4">Спасибо за участие!</p>
+                    <button onclick="resetQuiz()" class="no-print text-xs font-mono text-slate-400 hover:text-cyan-400 underline transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Начать заново
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const questionnaireData = [
+            {
+                category: "Проявления уверенности",
+                icon: "fa-user-check",
+                color: "cyan",
+                questions: [
+                    { id: "q1", text: "Когда я выступаю или веду занятие, я говорю ровно и спокойно, смотрю на аудиторию." },
+                    { id: "q2", text: "Во время выступления я держусь свободно: поза открытая, жесты естественные." },
+                    { id: "q3", text: "Я отвечаю на вопросы сразу и могу аргументировать свою позицию." },
+                    { id: "q4", text: "Я сам(а) предлагаю идеи, задаю вопросы, берусь за роль или задание." }
+                ]
+            },
+            {
+                category: "Проявления страха ошибки",
+                icon: "fa-triangle-exclamation",
+                color: "pink",
+                questions: [
+                    { id: "q5", text: "Я жду подсказки или одобрения, прежде чем начать действовать." },
+                    { id: "q6", text: "Я часто извиняюсь или говорю о себе «наверное, это неправильно»." },
+                    { id: "q7", text: "Я после каждого шага сверяюсь с конспектом или с преподавателем." },
+                    { id: "q8", text: "Перед выступлением или во время него у меня дрожит голос, появляется скованность, я «зависаю»." }
+                ]
+            },
+            {
+                category: "Реакция на ошибку",
+                icon: "fa-rotate",
+                color: "purple",
+                questions: [
+                    { id: "q9", text: "Когда я ошибаюсь, я признаю это и исправляю." },
+                    { id: "q10", text: "После ошибки я теряюсь и не могу продолжать работу." },
+                    { id: "q11", text: "После ошибки я оправдываюсь или объясняю её внешними причинами." },
+                    { id: "q12", text: "Я использую свои ошибки, чтобы разобраться, чему научиться." }
+                ]
+            },
+            {
+                category: "Учебные индикаторы",
+                icon: "fa-book-bookmark",
+                color: "emerald",
+                questions: [
+                    { id: "q13", text: "Если мне что-то непонятно, я задаю уточняющие вопросы." },
+                    { id: "q14", text: "Я спокойно принимаю замечания и учитываю их в работе." },
+                    { id: "q15", text: "Я выполняю задания полностью и в срок." },
+                    { id: "q16", text: "Я выбираю привычный способ выполнения задания, даже если новый может быть интереснее." }
+                ]
+            }
+        ];
+
+        const answers = {};
+        const totalQuestions = 16;
+        let radarChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Default current date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('user-date').value = today;
+
+            renderQuestions();
+        });
+
+        function renderQuestions() {
+            const wrapper = document.getElementById('questions-wrapper');
+            let globalQIndex = 1;
+
+            questionnaireData.forEach((cat, catIdx) => {
+                const catCard = document.createElement('div');
+                catCard.className = `glass-panel p-6 sm:p-8 rounded-2xl border-t-2 border-${cat.color}-400 space-y-6`;
+
+                catCard.innerHTML = `
+                    <div class="flex items-center space-x-3 pb-3 border-b border-slate-800">
+                        <div class="w-9 h-9 rounded-xl bg-${cat.color}-500/10 border border-${cat.color}-500/30 flex items-center justify-center text-${cat.color}-400">
+                            <i class="fa-solid ${cat.icon}"></i>
+                        </div>
+                        <h2 class="text-lg font-orbitron font-semibold text-white">${catIdx + 1}. ${cat.category}</h2>
+                    </div>
+                    <div class="space-y-6">
+                        ${cat.questions.map((q) => {
+                            const qNum = globalQIndex++;
+                            return `
+                                <div class="bg-slate-900/40 p-4 sm:p-5 rounded-xl border border-slate-800/80 hover:border-slate-700 transition">
+                                    <p class="text-sm sm:text-base text-slate-200 mb-4 font-normal">
+                                        <span class="text-cyan-400 font-mono font-bold mr-2">${qNum}.</span>${q.text}
+                                    </p>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                                        ${[0, 1, 2, 3].map(score => `
+                                            <button type="button" 
+                                                onclick="selectOption('${q.id}', ${score})" 
+                                                id="btn-${q.id}-${score}" 
+                                                class="score-btn w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-900/80 text-xs font-mono flex items-center justify-center space-x-2 text-slate-400 hover:text-white hover:border-slate-600">
+                                                <span class="font-bold font-orbitron">${score}</span>
+                                                <span class="text-[11px] opacity-80">
+                                                    ${score === 0 ? 'Никогда' : score === 1 ? 'Редко' : score === 2 ? 'Часто' : 'Почти всегда'}
+                                                </span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                wrapper.appendChild(catCard);
+            });
+        }
+
+        function selectOption(qId, score) {
+            answers[qId] = score;
+
+            [0, 1, 2, 3].forEach(val => {
+                const btn = document.getElementById(`btn-${qId}-${val}`);
+                if (val === score) {
+                    btn.className = `score-btn w-full py-2.5 px-3 rounded-xl border text-xs font-mono flex items-center justify-center space-x-2 font-semibold selected-${val}`;
+                } else {
+                    btn.className = `score-btn w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-900/80 text-xs font-mono flex items-center justify-center space-x-2 text-slate-400 hover:text-white hover:border-slate-600`;
+                }
+            });
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).length;
+            const percent = Math.round((answeredCount / totalQuestions) * 100);
+
+            document.getElementById('progress-text').innerText = `${answeredCount} / ${totalQuestions} (${percent}%)`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            if (answeredCount === totalQuestions) {
+                document.getElementById('progress-spinner').className = "fa-solid fa-circle-check text-emerald-400";
+            }
+        }
+
+        function calculateResults() {
+            const userCode = document.getElementById('user-code').value.trim();
+            const userCourse = document.getElementById('user-course').value.trim();
+            const userDate = document.getElementById('user-date').value;
+            const errorBox = document.getElementById('validation-error');
+
+            if (!userCode || !userCourse) {
+                document.getElementById('error-message').innerText = "Заполните 'Код участника' и 'Курс' перед отправкой!";
+                errorBox.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            if (Object.keys(answers).length < totalQuestions) {
+                document.getElementById('error-message').innerText = `Ответьте на все вопросы! Отвечено ${Object.keys(answers).length} из ${totalQuestions}.`;
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            errorBox.classList.add('hidden');
+
+            // Category 1: Confidence
+            const scoreCat1 = answers.q1 + answers.q2 + answers.q3 + answers.q4;
+            // Category 2: Fear of Error
+            const scoreCat2 = answers.q5 + answers.q6 + answers.q7 + answers.q8;
+            // Category 3: Reaction to Error (constructive)
+            const scoreCat3 = answers.q9 + (3 - answers.q10) + (3 - answers.q11) + answers.q12;
+            // Category 4: Learning Indicators
+            const scoreCat4 = answers.q13 + answers.q14 + answers.q15 + (3 - answers.q16);
+
+            document.getElementById('res-user-code').innerText = userCode;
+            document.getElementById('res-user-course').innerText = userCourse;
+            document.getElementById('res-user-date').innerText = userDate;
+
+            document.getElementById('score-cat-1').innerText = scoreCat1;
+            document.getElementById('score-cat-2').innerText = scoreCat2;
+            document.getElementById('score-cat-3').innerText = scoreCat3;
+            document.getElementById('score-cat-4').innerText = scoreCat4;
+
+            document.getElementById('bar-cat-1').style.width = `${(scoreCat1 / 12) * 100}%`;
+            document.getElementById('bar-cat-2').style.width = `${(scoreCat2 / 12) * 100}%`;
+            document.getElementById('bar-cat-3').style.width = `${(scoreCat3 / 12) * 100}%`;
+            document.getElementById('bar-cat-4').style.width = `${(scoreCat4 / 12) * 100}%`;
+
+            renderInterpretations(scoreCat1, scoreCat2, scoreCat3, scoreCat4);
+            renderRadarChart([scoreCat1, scoreCat2, scoreCat3, scoreCat4]);
+
+            const dashboard = document.getElementById('results-dashboard');
+            dashboard.classList.remove('hidden');
+            dashboard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderInterpretations(c1, c2, c3, c4) {
+            let c1Text = c1 >= 9 
+                ? "<strong class='text-cyan-400'>Высокая уверенность:</strong> Вы держитесь свободно, уверенно аргументируете и активны во время выступлений."
+                : c1 >= 5 
+                ? "<strong class='text-cyan-300'>Умеренная уверенность:</strong> Достаточная уверенность, хотя в напряженных условиях возможны сомнения."
+                : "<strong class='text-slate-400'>Низкая уверенность:</strong> Наблюдаются сложности с публичными выступлениями и подачей себя.";
+
+            let c2Text = c2 >= 9 
+                ? "<strong class='text-pink-400'>Высокий страх ошибки:</strong> Присутствует выраженная скованность и боязнь оступиться."
+                : c2 >= 5 
+                ? "<strong class='text-pink-300'>Умеренный страх ошибки:</strong> Контролируемое волнение, которое существенно не мешает работе."
+                : "<strong class='text-emerald-400'>Низкий страх ошибки:</strong> Независимость и способность спокойно воспринимать риски.";
+
+            let c3Text = c3 >= 9 
+                ? "<strong class='text-purple-400'>Конструктивная реакция:</strong> Ошибки воспринимаются как возможность для роста и обучения."
+                : c3 >= 5 
+                ? "<strong class='text-purple-300'>Умеренная реакция:</strong> Способность извлекать уроки, хотя ошибки могут вызывать временный дискомфорт."
+                : "<strong class='text-red-400'>Деструктивная реакция:</strong> Ошибки вызывают сильный стресс и желание оправдаться.";
+
+            let c4Text = c4 >= 9 
+                ? "<strong class='text-emerald-400'>Высокая учебная активность:</strong> Готовность учиться, задавать вопросы и пробовать новое."
+                : c4 >= 5 
+                ? "<strong class='text-emerald-300'>Умеренная учебная активность:</strong> Стабильное выполнение задач с регулярным использованием проверенных способов."
+                : "<strong class='text-amber-400'>Консервативный подход:</strong> Предрасположенность к привычным алгоритмам и избегание новизны.";
+
+            document.getElementById('interpretation-confidence').innerHTML = `<p class='text-slate-300'>${c1Text}</p>`;
+            document.getElementById('interpretation-fear').innerHTML = `<p class='text-slate-300'>${c2Text}</p>`;
+            document.getElementById('interpretation-reaction').innerHTML = `<p class='text-slate-300'>${c3Text}</p>`;
+            document.getElementById('interpretation-learning').innerHTML = `<p class='text-slate-300'>${c4Text}</p>`;
+        }
+
+        function renderRadarChart(scores) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Уверенность',
+                        'Страх ошибки',
+                        'Конструктивность',
+                        'Адаптивность'
+                    ],
+                    datasets: [{
+                        label: 'Баллы',
+                        data: scores,
+                        backgroundColor: 'rgba(0, 243, 255, 0.25)',
+                        borderColor: '#00f3ff',
+                        pointBackgroundColor: '#a855f7',
+                        pointBorderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 12,
+                            ticks: { display: false },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            angleLines: { color: 'rgba(255, 255, 255, 0.15)' },
+                            pointLabels: {
+                                color: '#94a3b8',
+                                font: { size: 10, family: 'Orbitron' }
+                            }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function exportJSON() {
+            const reportData = {
+                userCode: document.getElementById('user-code').value,
+                userCourse: document.getElementById('user-course').value,
+                date: document.getElementById('user-date').value,
+                scores: {
+                    confidence: document.getElementById('score-cat-1').innerText,
+                    fearOfError: document.getElementById('score-cat-2').innerText,
+                    constructiveReaction: document.getElementById('score-cat-3').innerText,
+                    learningIndicators: document.getElementById('score-cat-4').innerText
+                },
+                rawAnswers: answers
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Result_${reportData.userCode || 'quiz'}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function resetQuiz() {
+            for (let member in answers) delete answers[member];
+            
+            document.querySelectorAll('.score-btn').forEach(btn => {
+                btn.className = `score-btn w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-900/80 text-xs font-mono flex items-center justify-center space-x-2 text-slate-400 hover:text-white hover:border-slate-600`;
+            });
+
+            updateProgress();
+            document.getElementById('results-dashboard').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
